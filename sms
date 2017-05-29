@@ -1,0 +1,128 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Tesseract;
+
+namespace SMS
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+
+          
+
+
+            var testImagePath = @"C:\Users\ravindran\documents\visual studio 2015\Projects\SMS\SMS\captcha.bmp";
+            var dataPath = @"C:\Users\ravindran\Documents\visual studio 2015\Projects\SMS\SMS\tesseract-master\tesseract-master\tessdata\";
+
+            try
+
+            {
+                using (var engine = new TesseractEngine(@"C:\Program Files\Tesseract-OCR\tessdata", "eng", EngineMode.Default))
+                                    {
+                    // have to load Pix via a bitmap since Pix doesn't support loading a stream.
+                    using (var image = new Bitmap(testImagePath))
+                    {
+                        using (var pix = PixConverter.ToPix(image))
+                        {
+                            using (var page = engine.Process(pix))
+                            {
+                                Console.WriteLine(page.GetMeanConfidence() + " : " + page.GetText());
+                                int x = Convert.ToInt32(page.GetText());
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unexpected Error: " + e.Message);
+            }
+
+            webBrowser1.Navigate("http://site2sms.com/login.asp");
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+        bool is_sec_page = false;
+        private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+           
+        }
+
+        private void webBrowser1_DocumentCompleted_1(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            if (!is_sec_page)
+            {
+                //get page element with id
+               // webBrowser1.Document.ge("c_Username").InnerText = "username";
+
+                webBrowser1.Document.GetElementsByTagName("input").GetElementsByName("username")[0].SetAttribute("value", "8148681001");
+                webBrowser1.Document.GetElementsByTagName("input").GetElementsByName("password")[0].SetAttribute("value", "aravindop");
+                //webBrowser1.Document.GetElementById("c_Password").InnerText = "pass";
+                //login in to account(fire a login button promagatelly)
+                //webBrowser1.Document.GetElementById("login").InvokeMember("click");
+                webBrowser1.Document.GetElementById("login").InvokeMember("submit");
+
+
+                is_sec_page = true;
+            }
+            //secound page(if correctly aotanticate
+            else
+            {
+                //intract with sec page elements with theire ids and so on
+            }
+
+
+            System.Net.WebClient wc = new System.Net.WebClient();
+            HtmlElementCollection imgs = this.webBrowser1.Document.GetElementsByTagName("img");
+
+            for (int i = 0; i < imgs.Count; i++)
+            {
+                wc.DownloadFile(imgs[i].GetAttribute("src"), @"C:\Users\ravindran\documents\visual studio 2015\Projects\SMS\SMS\captcha.bmp");
+            }
+
+          //  int CaptchaWidth = getXoffset(webBrowser1.Document.GetElementById("Captch-Element-Name"));
+           // int CaptchaHeight = getYoffset(webBrowser1.Document.GetElementById("Captch-Element-Name"));
+
+           // Bitmap bitmap = new Bitmap(CaptchaWidth, CaptchaHeight);
+         //   webBrowser1.DrawToBitmap(bitmap, new Rectangle(0, 0, CaptchaWidth, CaptchaHeight));
+
+        }
+        public int getXoffset(HtmlElement el)
+        {
+            int xPos = el.OffsetRectangle.Left;
+            HtmlElement tempEl = el.OffsetParent;
+            while (tempEl != null)
+            {
+                xPos += tempEl.OffsetRectangle.Left;
+                tempEl = tempEl.OffsetParent;
+            }
+            return xPos;
+        }
+
+        public int getYoffset(HtmlElement el)
+        {
+            int yPos = el.OffsetRectangle.Top;
+            HtmlElement tempEl = el.OffsetParent;
+            while (tempEl != null)
+            {
+                yPos += tempEl.OffsetRectangle.Top;
+                tempEl = tempEl.OffsetParent;
+            }
+            return yPos;
+        }
+
+
+    }
+}
