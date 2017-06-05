@@ -1,0 +1,193 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Tesseract;
+
+namespace SMS
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+
+
+
+
+
+
+            var testImagePath = @"C:\Users\ravindran\documents\visual studio 2015\Projects\SMS\SMS\captcha.bmp";
+            var dataPath = @"C:\Users\ravindran\Documents\visual studio 2015\Projects\SMS\SMS\tesseract-master\tesseract-master\tessdata\";
+
+            try
+
+            {
+                //using (var engine = new TesseractEngine(@"C:\Program Files\Tesseract-OCR\tessdata", "eng", EngineMode.Default))
+                //                    {
+                //    // have to load Pix via a bitmap since Pix doesn't support loading a stream.
+                //    using (var image = new Bitmap(testImagePath))
+                //    {
+                //        using (var pix = PixConverter.ToPix(image))
+                //        {
+                //            using (var page = engine.Process(pix))
+                //            {
+                //                Console.WriteLine(page.GetMeanConfidence() + " : " + page.GetText());
+                //                int x = Convert.ToInt32(page.GetText());
+                //            }
+                //        }
+                //    }
+                //}
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unexpected Error: " + e.Message);
+            }
+
+            webBrowser1.Navigate("http://www.afreesms.com/intl/india");
+            webBrowser1.ScriptErrorsSuppressed = true;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+        bool is_sec_page = false;
+        private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+
+        }
+
+        private void webBrowser1_DocumentCompleted_1(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+         
+
+            if (!is_sec_page)
+            {
+                var text = webBrowser1.DocumentText;
+
+                mshtml.HTMLDocument doc = webBrowser1.Document.DomDocument as mshtml.HTMLDocument;
+                string html = doc.documentElement.outerHTML;
+
+
+                string data = "setbg('#f0f5e6',this.id)";
+
+                var fvalue = html.Split(new string[] { data }, StringSplitOptions.None);
+
+
+                if (fvalue.Count() > 3)
+                {
+                    List<string> IDS = new List<string>();
+
+                    for (int i = 1; i < fvalue.Count(); i++)
+                    {
+                        string pattern = @"(?<=id=)\w+";
+                        string input = fvalue[i];
+                        Match m = Regex.Match(input, pattern);
+                        IDS.Add(m.Value);
+
+                    }
+
+                    webBrowser1.Document.GetElementsByTagName("input").GetElementsByName(IDS[0])[0].SetAttribute("value", "8148681001");
+
+                    //webBrowser1.Document.GetElementsByTagName("input").GetElementsByName(IDS[1])[0].SetAttribute("value", "8148681001 HI HI HI");
+
+                    webBrowser1.Document.GetElementById(IDS[1]).InnerText = "8148681001 HI HI HIdgfvsdegvsdgvsdg";
+
+                    // webBrowser1.Document.GetElementById("submit").RaiseEvent("onclick");
+
+
+                    if (fvalue.Count() == 4)
+                    {
+                        webBrowser1.Document.GetElementById("submit").InvokeMember("click");
+                    }
+                    
+                    //webBrowser1.Document.All("submit").InvokeMember("click");
+
+                    // webBrowser1.Document.All("submit").RaiseEvent("onclick");
+
+                    //HtmlElement btnElement = webBrowser1.Document.All.GetElementsByName("IL_IN_TAG")[0];
+                    //btnElement.InvokeMember("click");
+
+
+
+                    
+
+                    getIDS();
+
+
+
+                }
+            }
+          
+
+        }
+        public int getXoffset(HtmlElement el)
+        {
+            int xPos = el.OffsetRectangle.Left;
+            HtmlElement tempEl = el.OffsetParent;
+            while (tempEl != null)
+            {
+                xPos += tempEl.OffsetRectangle.Left;
+                tempEl = tempEl.OffsetParent;
+            }
+            return xPos;
+        }
+
+        public int getYoffset(HtmlElement el)
+        {
+            int yPos = el.OffsetRectangle.Top;
+            HtmlElement tempEl = el.OffsetParent;
+            while (tempEl != null)
+            {
+                yPos += tempEl.OffsetRectangle.Top;
+                tempEl = tempEl.OffsetParent;
+            }
+            return yPos;
+        }
+
+        public string getIDS()
+        {
+            //using (var engine = new TesseractEngine(@"C:\Program Files\Tesseract-OCR\tessdata", "eng", EngineMode.Default))
+            //                    {
+            //    // have to load Pix via a bitmap since Pix doesn't support loading a stream.
+            //    using (var image = new Bitmap(testImagePath))
+            //    {
+            //        using (var pix = PixConverter.ToPix(image))
+            //        {
+            //            using (var page = engine.Process(pix))
+            //            {
+            //                Console.WriteLine(page.GetMeanConfidence() + " : " + page.GetText());
+            //                int x = Convert.ToInt32(page.GetText());
+            //            }
+            //        }
+            //    }
+            //}
+
+
+            System.Net.WebClient wc = new System.Net.WebClient();
+            HtmlElementCollection imgs = this.webBrowser1.Document.GetElementsByTagName("img");
+
+            //for (int i = 0; i < imgs.Count; i++)
+            //{
+            //    wc.DownloadFile(imgs[i].GetAttribute("src"), @"C:\Users\ravindran\documents\visual studio 2015\Projects\SMS\SMS\captcha.bmp");
+            //}
+
+             wc.DownloadFile(imgs[2].GetAttribute("src"), @"C:\Users\ravindran\documents\visual studio 2015\Projects\SMS\SMS\captcha.bmp");
+
+
+          
+
+
+            return null;
+        }
+
+
+    }
+}
